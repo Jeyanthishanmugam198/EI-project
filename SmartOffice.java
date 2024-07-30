@@ -37,6 +37,7 @@ class Office {
         if (roomNumber > 0 && roomNumber <= rooms.size()) {
             return rooms.get(roomNumber - 1);
         }
+        System.out.println("Invalid room number. Please enter a valid room number.");
         return null;
     }
 }
@@ -227,31 +228,78 @@ class CancelBookingCommand implements Command {
 public class SmartOffice {
     public static void main(String[] args) {
         Office office = Office.getInstance();
-        Command configRooms = new ConfigureRoomsCommand(office, 3);
-        configRooms.execute();
+        Scanner scanner = new Scanner(System.in);
 
-        Room room1 = office.getRoom(1);
-        if (room1 != null) {
-            Command setMaxCapacity = new SetMaxCapacityCommand(room1, 10);
-            setMaxCapacity.execute();
+        while (true) {
+            System.out.println("Choose an option:");
+            System.out.println("1. Configure Rooms");
+            System.out.println("2. Set Room Max Capacity");
+            System.out.println("3. Add Occupant");
+            System.out.println("4. Book Room");
+            System.out.println("5. Cancel Booking");
+            System.out.println("6. Exit");
 
-            AC ac = new AC();
-            Lights lights = new Lights();
-            room1.addObserver(ac);
-            room1.addObserver(lights);
+            int choice = scanner.nextInt();
 
-            Command addOccupant = new AddOccupantCommand(room1, 2);
-            addOccupant.execute();
-
-            Command bookRoom = new BookRoomCommand(room1, "09:00", 60);
-            bookRoom.execute();
-
-            Command cancelBooking = new CancelBookingCommand(room1);
-            cancelBooking.execute();
-
-            Command removeOccupant = new AddOccupantCommand(room1, 0);
-            removeOccupant.execute();
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter number of rooms to configure: ");
+                    int roomCount = scanner.nextInt();
+                    Command configRooms = new ConfigureRoomsCommand(office, roomCount);
+                    configRooms.execute();
+                    break;
+                case 2:
+                    System.out.print("Enter room number to set max capacity: ");
+                    int roomNumberForCapacity = scanner.nextInt();
+                    Room roomForCapacity = office.getRoom(roomNumberForCapacity);
+                    if (roomForCapacity != null) {
+                        System.out.print("Enter max capacity for Room " + roomNumberForCapacity + ": ");
+                        int capacity = scanner.nextInt();
+                        Command setMaxCapacity = new SetMaxCapacityCommand(roomForCapacity, capacity);
+                        setMaxCapacity.execute();
+                    }
+                    break;
+                case 3:
+                    System.out.print("Enter room number to add occupants: ");
+                    int roomNumberForOccupants = scanner.nextInt();
+                    Room roomForOccupants = office.getRoom(roomNumberForOccupants);
+                    if (roomForOccupants != null) {
+                        System.out.print("Enter number of occupants for Room " + roomNumberForOccupants + ": ");
+                        int occupants = scanner.nextInt();
+                        Command addOccupant = new AddOccupantCommand(roomForOccupants, occupants);
+                        addOccupant.execute();
+                    }
+                    break;
+                case 4:
+                    System.out.print("Enter room number to book: ");
+                    int roomNumberForBooking = scanner.nextInt();
+                    Room roomForBooking = office.getRoom(roomNumberForBooking);
+                    if (roomForBooking != null) {
+                        System.out.print("Enter start time (e.g., 09:00) for Room " + roomNumberForBooking + ": ");
+                        String time = scanner.next();
+                        System.out.print("Enter duration in minutes for Room " + roomNumberForBooking + ": ");
+                        int duration = scanner.nextInt();
+                        Command bookRoom = new BookRoomCommand(roomForBooking, time, duration);
+                        bookRoom.execute();
+                    }
+                    break;
+                case 5:
+                    System.out.print("Enter room number to cancel booking: ");
+                    int roomNumberForCancel = scanner.nextInt();
+                    Room roomForCancel = office.getRoom(roomNumberForCancel);
+                    if (roomForCancel != null) {
+                        Command cancelBooking = new CancelBookingCommand(roomForCancel);
+                        cancelBooking.execute();
+                    }
+                    break;
+                case 6:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
         }
     }
 }
-
